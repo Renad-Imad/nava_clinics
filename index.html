@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NAVA Clinics | Beyond The Surface</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'nava-rose': '#C59A8F', 'nava-dark': '#0D0D0D' },
+                    fontFamily: { 
+                        'serif': ['"Playfair Display"', 'serif'], 
+                        'sans': ['"Lato"', 'sans-serif'] 
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 1. Base Styles */
+        body { 
+            background-color: #0D0D0D; 
+            color: white; 
+            font-family: 'Lato', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
+        }
+        
+        h1, h2, h3, .font-serif { font-family: 'Playfair Display', serif !important; }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.04; pointer-events: none; z-index: 9999;
+        }
+
+        /* 2. Animations */
+        @keyframes growLine { 0%, 100% { height: 20px; opacity: 0.2; } 50% { height: 40px; opacity: 1; } }
+        .animate-grow { animation: growLine 2.5s infinite ease-in-out; }
+
+        @keyframes pulseLine {
+            0% { background-color: rgba(255, 255, 255, 0.3); }
+            50% { background-color: rgba(197, 154, 143, 0.5); }
+            100% { background-color: rgba(255, 255, 255, 0.3); }
+        }
+
+        /* 3. Interactive Components */
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        .reveal-text.active { opacity: 1; transform: translateY(0); }
+
+        .nava-link {
+            text-decoration: none;
+            color: white;
+            font-size: 11px;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+        }
+        .nava-link .expanding-line {
+            margin-left: 15px;
+            width: 30px;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .nava-link .arrow-tip {
+            font-size: 8px;
+            opacity: 0;
+            transform: translateX(-5px);
+            transition: all 0.5s ease;
+            color: #C59A8F;
+            margin-left: 8px;
+        }
+
+        .nava-link:hover .text-label, .nava-link:active .text-label { color: #C59A8F; }
+        .nava-link:hover .expanding-line, .nava-link:active .expanding-line { width: 70px; background-color: #C59A8F; }
+        .nava-link:hover .arrow-tip, .nava-link:active .arrow-tip { opacity: 1; transform: translateX(0); }
+
+        /* 4. Doctors Section (Spotlight Effect) */
+        .doctor-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%);
+            transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        .doctor-card:hover .doctor-img, 
+        .doctor-card.is-active .doctor-img {
+            filter: grayscale(0%);
+            transform: scale(1.08);
+        }
+
+        .doctor-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: white;
+            font-style: italic;
+            transition: color 0.5s ease;
+        }
+
+        .doctor-card:hover .doctor-name, 
+        .doctor-card.is-active .doctor-name {
+            color: #C59A8F;
+        }
+
+        .doctor-title {
+            font-family: 'Lato', sans-serif;
+            color: #C59A8F;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-weight: 300;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 5. Contact Triggers (Booking Section) */
+        .nava-contact-trigger {
+            position: relative;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .nava-contact-trigger:active { transform: scale(0.95); }
+        .nava-contact-trigger:hover i { text-shadow: 0 0 15px rgba(197, 154, 143, 0.4); }
+
+        /* 6. Background Effects */
+        .zoom-out-effect { transform: scale(1) !important; }
+        
+        @keyframes glassShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 16vw !important; }
+            .nava-link .expanding-line { width: 40px; animation: pulseLine 3s infinite; }
+        }
+
+        video { filter: brightness(0.85) contrast(1.05); }
+
+        /* When scrolled into view: Image turns to color */
+        #about-trigger.is-revealed #about-img {
+            filter: grayscale(0%);
+            transform: scale(1);
+        }
+
+        /* When scrolled into view: Badge floats up and fades in */
+        #about-trigger.is-revealed #about-badge {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nava-social-icon {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.3);
+        transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        position: relative;
+        }
+
+        .nava-social-icon:hover, .nava-social-icon:active {
+            color: #C59A8F;
+            transform: translateY(-3px);
+            text-shadow: 0 0 15px rgba(197, 154, 143, 0.4);
+        }
+
+        /* Subtle dot indicator under icon on hover */
+        .nava-social-icon::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 3px;
+            height: 3px;
+            background-color: #C59A8F;
+            border-radius: 50%;
+            transition: transform 0.4s ease;
+        }
+
+        .nava-social-icon:hover::after {
+            transform: translateX(-50%) scale(1);
+        }
+
+        .nava-footer-icon {
+    position: relative;
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.25);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.nava-footer-icon:hover {
+    color: #C59A8F;
+    transform: translateY(-5px);
+}
+
+/* Floating label that appearing on hover */
+.icon-label {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    font-size: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: #C59A8F;
+    opacity: 0;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.nava-footer-icon:hover .icon-label {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Iconic Glow */
+.nava-footer-icon:hover i {
+    filter: drop-shadow(0 0 8px rgba(197, 154, 143, 0.5));
+}
+
+.nava-footer-icon {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.nava-footer-icon:hover {
+    color: #C59A8F;
+    transform: translateY(-3px) scale(1.1);
+    text-shadow: 0 0 15px rgba(197, 154, 143, 0.3);
+}
+
+/* Luxury Divider Animation */
+footer h4::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: #C59A8F;
+    margin-top: 10px;
+    opacity: 0.3;
+    transition: width 0.5s ease;
+}
+
+footer div:hover h4::after {
+    width: 40px;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .grid-cols-12 > div { border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 2rem; }
+    .grid-cols-12 > div:last-child { border-bottom: none; }
+}
+
+/* Service Card Glass Shine */
+#services .group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+    transform: skewX(-25deg);
+    transition: 0.75s;
+    z-index: 1;
+}
+
+#services .group:hover::before {
+    left: 125%;
+}
+
+/* Add to your CSS */
+.service-orbit {
+    transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Give different services different animation speeds for an organic feel */
+.service-orbit:nth-child(even) { animation-duration: 8s; animation-delay: 1s; }
+.service-orbit:nth-child(3n) { animation-duration: 10s; animation-delay: 2s; }
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(10px, -15px); }
+}
+
+/* Hover Focus Effect: When one is hovered, others dim */
+#services:hover .service-orbit:not(:hover) {
+    opacity: 0.15;
+    filter: blur(4px);
+    transform: scale(0.95);
+}
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <nav id="navbar" class="fixed top-0 left-0 w-full z-[100] transition-all duration-500 py-6 px-6 md:px-16 flex justify-between items-center">
+        <div class="logo">
+            <img src="https://www.navaclinics.com/front/assets/images/logo-cta.svg" class="h-12 md:h-7 brightness-0 invert" alt="Nava Logo">
+        </div>
+        <button id="menu-toggle" class="group flex flex-col items-start gap-1.5 p-2">
+            <span class="w-8 h-[1px] bg-white transition-all group-hover:w-10"></span>
+            <span class="w-5 h-[1px] bg-nava-rose"></span>
+        </button>
+    </nav>
+
+    <div id="mobile-menu" class="fixed inset-0 bg-nava-dark z-[200] translate-y-full transition-transform duration-700 flex flex-col items-center justify-center p-8 text-center uppercase tracking-[0.4em] font-serif">
+        <button id="close-menu" class="absolute top-8 left-8 text-white/50 text-4xl font-light">×</button>
+        <div class="space-y-10">
+            <a href="#home" class="block text-4xl text-white hover:italic transition-all">Home</a>
+            <a href="#about" class="block text-4xl text-white hover:italic transition-all">About</a>
+            <a href="#doctors" class="block text-4xl text-white hover:italic transition-all">The Team</a>
+            <a href="#location" class="block text-4xl text-white hover:italic transition-all">Location</a>
+            <a href="https://wa.me/966920006226" class="inline-block mt-6 border-b border-nava-rose text-nava-rose py-2 font-sans tracking-[0.2em] text-xs">Book Appointment</a>
+        </div>
+    </div>
+
+    <section id="home" class="relative h-[100svh] w-full flex items-center justify-center overflow-hidden bg-nava-dark">
+        <div id="hero-video-container" class="absolute inset-0 z-0">
+            <video autoplay muted loop playsinline class="w-full h-full object-cover">
+                <source src="assest/nava-hero.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-black/30"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90"></div>
+        </div>
+
+        <div class="relative z-10 w-full h-full flex flex-col justify-between py-24 px-8 text-center">
+            <div class="flex items-center justify-center gap-4" data-aos="fade-down" data-aos-delay="300">
+                <span class="h-[1px] w-6 bg-nava-rose/60"></span>
+                <p class="font-sans text-[10px] tracking-[0.5em] text-nava-rose uppercase font-bold">The Essence of Beauty</p>
+                <span class="h-[1px] w-6 bg-nava-rose/60"></span>
+            </div>    
+
+            <div class="flex flex-col items-center gap-8">
+                <a href="https://wa.me/966920006226" id="magnetic-btn" class="group relative overflow-hidden font-sans text-[11px] tracking-[0.4em] text-white border border-white/20 px-12 py-5 backdrop-blur-md transition-all duration-500 hover:border-nava-rose">
+                    <span class="relative z-10 group-hover:text-nava-rose transition-colors duration-500">VISIT US</span>
+                    <div class="absolute inset-0 bg-white scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 opacity-10"></div>
+                </a>
+                
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-[8px] tracking-[0.2em] text-white/30 uppercase font-sans animate-pulse">Scroll</span>
+                    <div class="w-[1px] h-10 bg-gradient-to-b from-nava-rose to-transparent animate-grow"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="relative py-24 bg-nava-dark overflow-hidden px-6">
+        <div class="absolute -top-20 -right-20 w-80 h-80 bg-nava-rose/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+            <div class="w-full lg:hidden">
+                <span class="inline-flex items-center gap-3 text-nava-rose text-[9px] uppercase tracking-[0.5em] font-bold mb-4" data-aos="fade-right">
+                    <span class="w-6 h-[1px] bg-nava-rose/40"></span>Our Legacy
+                </span>
+                <h2 class="font-serif text-[14vw] leading-[1.0] text-white italic reveal-text">The Homeland <br><span class="not-italic text-nava-rose">Of Beauty</span></h2>
+            </div>
+
+            <div id="about-trigger" class="w-full lg:w-1/2 relative group" data-aos="fade-up">
+            <div class="relative aspect-[3/4] overflow-hidden shadow-2xl">
+                <img src="assest/bg.jpg" id="about-img" class="w-full h-full object-cover scale-110 grayscale transition-all duration-[2s]" alt="Nava Luxury">
+                
+                <div id="about-badge" class="absolute bottom-6 right-6 bg-white/5 backdrop-blur-xl border border-white/10 p-5 translate-y-4 opacity-0 transition-all duration-700">
+                    <span class="block font-serif text-2xl text-nava-rose italic">Precision</span>
+                    <span class="block font-sans text-[7px] uppercase tracking-[0.2em] text-white/50 mt-1">Saudi Medical Excellence</span>
+                </div>
+            </div>
+        </div>
+
+            <div class="w-full lg:w-1/2 text-left space-y-8">
+                <div class="hidden lg:block">
+                    <h2 class="font-serif text-8xl text-white italic leading-none reveal-text">The Homeland <br><span class="not-italic text-nava-rose">Of Beauty</span></h2>
+                </div>
+                <div class="space-y-6">
+                    <p class="text-gray-300 font-sans font-light text-xl leading-relaxed italic border-l-2 border-nava-rose/30 pl-6" data-aos="fade-left">"At NAVA, we don't just transform; we reveal."</p>
+                    <p class="text-gray-400 font-sans font-light text-lg leading-relaxed opacity-80" data-aos="fade-up">By blending <span class="text-white">Saudi medical precision</span> with an artistic eye, we create a bespoke experience.</p>
+                </div>
+                <div class="pt-8" data-aos="fade-up">
+                    <a href="#doctors" class="nava-link inline-flex items-center group">
+                        <span class="text-nava-rose">Meet Experts</span>
+                        <span class="expanding-line"></span>
+                        <span class="arrow-tip"><i class="fas fa-arrow-right"></i></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="relative py-32 bg-nava-dark overflow-hidden px-6">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-nava-rose/5 blur-[150px] rounded-full"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-nava-rose/10 blur-[180px] rounded-full"></div>
+
+    <div class="max-w-7xl mx-auto relative min-h-[800px] flex items-center justify-center">
+        
+        <div class="absolute z-10 text-center pointer-events-none" data-aos="fade-in">
+            <span class="block font-sans text-[10px] tracking-[0.8em] text-nava-rose/40 uppercase mb-4">Select your</span>
+            <h2 class="font-serif text-6xl md:text-8xl text-white/10 italic">Evolution</h2>
+        </div>
+
+        <div class="relative w-full h-full flex flex-wrap justify-center items-center gap-12 md:gap-24">
+            
+            <div class="service-orbit group" style="transform: translateY(-40px);" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="font-serif text-5xl md:text-7xl text-white/60 group-hover:text-white group-hover:italic transition-all duration-700">Botox</h3>
+                    <span class="block h-px w-0 group-hover:w-full bg-nava-rose transition-all duration-700 mx-auto mt-2"></span>
+                    <p class="text-[8px] tracking-[0.4em] uppercase text-nava-rose opacity-0 group-hover:opacity-100 mt-4 transition-all">Softened Expression</p>
+            </div>
+
+            <div class="service-orbit group" style="transform: translateY(60px);" data-aos="fade-up" data-aos-delay="300">
+                <a href="https://wa.me/966920006226" class="block text-center">
+                    <h3 class="font-serif text-4xl md:text-6xl text-white/40 group-hover:text-nava-rose group-hover:italic transition-all duration-700">Rhinoplasty</h3>
+                    <p class="text-[8px] tracking-[0.4em] uppercase text-white/20 group-hover:text-white/60 mt-4 transition-all">Symmetry & Harmony</p>
+                </a>
+            </div>
+
+            <div class="service-orbit group" style="transform: translateX(-20px);" data-aos="fade-up" data-aos-delay="200">
+                <a href="https://wa.me/966920006226" class="block text-center">
+                    <h3 class="font-serif text-6xl md:text-8xl text-white/80 group-hover:text-white transition-all duration-1000">Laser</h3>
+                    <p class="text-[8px] tracking-[0.4em] uppercase text-nava-rose/60 mt-2">Precision Light</p>
+                </a>
+            </div>
+
+            <div class="service-orbit group" style="transform: translateY(-80px);" data-aos="fade-up" data-aos-delay="400">
+                <a href="https://wa.me/966920006226" class="block text-center">
+                    <h3 class="font-serif text-3xl md:text-5xl text-white/40 group-hover:text-white group-hover:italic transition-all duration-700">Body Contouring</h3>
+                    <span class="block h-[1px] w-8 bg-nava-rose/30 mx-auto mt-4 group-hover:w-20 transition-all"></span>
+                </a>
+            </div>
+
+            <div class="service-orbit group" style="transform: translateX(40px);" data-aos="fade-up" data-aos-delay="500">
+                <a href="https://wa.me/966920006226" class="block text-center">
+                    <h3 class="font-serif text-5xl md:text-7xl text-white/50 group-hover:text-nava-rose transition-all duration-700">Fillers</h3>
+                    <p class="text-[8px] tracking-[0.4em] uppercase text-white/20 mt-4">Volume & Architecture</p>
+                </a>
+            </div>
+
+            <div class="service-orbit group" style="transform: translateY(30px);" data-aos="fade-up" data-aos-delay="600">
+                <a href="https://wa.me/966920006226" class="block text-center">
+                    <h3 class="font-serif text-4xl md:text-6xl text-white/70 group-hover:text-white transition-all duration-700">Skin Treatments</h3>
+                    <p class="text-[8px] tracking-[0.4em] uppercase text-nava-rose opacity-0 group-hover:opacity-100 mt-2 transition-all">The Canvas of Beauty</p>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <section id="doctors" class="py-24 bg-black overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 border-b border-white/5 pb-8" data-aos="fade-up">
+                <span class="text-nava-rose text-[9px] uppercase tracking-[0.5em] font-bold mb-2 block">Our Visionaries</span>
+                <h2 class="font-serif text-5xl md:text-7xl text-white italic">The <span class="not-italic text-nava-rose">Experts</span></h2>
+            </div>
+
+            <div id="doctor-scroll" class="flex overflow-x-auto pb-12 gap-6 snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:overflow-visible md:gap-y-20">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
+                        <img src="assest/hatem.jpeg" class="doctor-img" alt="Hatem Al Noman">
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="doctor-name">Dr.Hatem Al Noman</h3>
+                        <p class="doctor-title">Consultant Plastic Surgery</p>
+                    </div>
+                </div>
+
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
+                        <img src="assest/mawaddah.jpeg" class="doctor-img" alt="Mawaddah Tallab">
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="doctor-name">Dr.Mawaddah Tallab</h3>
+                        <p class="doctor-title">Dermatology, Hair Diseases & Laser</p>
+                    </div>
+                </div>
+
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
+                        <img src="assest/ali.jpeg" class="doctor-img" alt="Ali Aldelgawi">
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="doctor-name">Dr.Ali Aldelgawi</h3>
+                        <p class="doctor-title">Consultant Plastic Surgery</p>
+                    </div>
+                </div>
+
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
+                        <img src="assest/Rasaa.jpeg" class="doctor-img" alt="Rasha Baaqeel">
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="doctor-name">Dr.Rasha Baaqeel</h3>
+                        <p class="doctor-title">Surgery, Cosmetic & Reconstructive</p>
+                    </div>
+                </div>
+
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
+                        <img src="assest/haddel.jpeg" class="doctor-img" alt="Hadeel Alkhatabi">
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="doctor-name">Dr.Hadeel Alkhatabi</h3>
+                        <p class="doctor-title">Dermatology & Cosmetic Consultant</p>
+                    </div>
+                </div>
+
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                    <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
+                        <img src="assest/yas.jpeg" class="doctor-img" alt="Yasmin Alfayez">
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="doctor-name">Dr.Yasmin Alfayez</h3>
+                        <p class="doctor-title">Dermatology, Cosmetics & Laser</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full h-[1px] bg-white/10 mt-8 md:hidden relative">
+                <div id="doctor-progress" class="absolute top-0 left-0 h-full bg-nava-rose w-1/4 transition-all duration-300"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="booking" class="relative min-h-[80svh] flex items-center justify-center bg-black overflow-hidden py-24 px-6">
+        <div class="absolute inset-0 z-0">
+            <img src="assest/bg.jpg" id="booking-bg-img" class="w-full h-full object-cover opacity-30 grayscale scale-125 transition-transform duration-[10s] ease-out" alt="Luxury Interior">
+            <div class="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black"></div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-2xl" data-aos="fade-up">
+            <div class="backdrop-blur-xl bg-white/[0.02] border border-white/5 p-12 md:p-20 text-center rounded-sm">
+                <div class="flex justify-center mb-10">
+                <img src="https://www.navaclinics.com/front/assets/images/logo-cta.svg" class="h-6 brightness-0 invert opacity-40" alt="Nava">
+                </div>
+                <h2 class="font-serif text-5xl md:text-8xl text-white italic mb-8 leading-tight">
+                    Your Vision <br>
+                    <span class="not-italic text-nava-rose">Perfected</span>
+                </h2>
+                <p class="text-gray-500 font-sans font-light tracking-[0.3em] text-[9px] uppercase mb-16">To provide you with better service.</p>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-0">
+                    <a href="https://wa.me/966920006226" target="_blank" class="nava-contact-trigger group px-10 py-4 flex flex-col items-center gap-3">
+                        <i class="fab fa-whatsapp text-2xl text-white/40 group-hover:text-nava-rose transition-colors duration-500"></i>
+                        <span class="font-sans text-[10px] text-white tracking-[0.4em] uppercase group-hover:text-nava-rose transition-colors duration-500">WhatsApp</span>
+                        <div class="h-[1px] w-4 bg-nava-rose/30 group-hover:w-full transition-all duration-700"></div>
+                    </a>
+
+                    <div class="hidden md:block w-[1px] h-12 bg-white/10 mx-4"></div>
+
+                    <a href="tel:966920006226" class="nava-contact-trigger group px-10 py-4 flex flex-col items-center gap-3">
+                        <i class="fas fa-phone-alt text-xl text-white/40 group-hover:text-nava-rose transition-colors duration-500"></i>
+                        <span class="font-sans text-[10px] text-white tracking-[0.4em] uppercase group-hover:text-nava-rose transition-colors duration-500">Call Now</span>
+                        <div class="h-[1px] w-4 bg-nava-rose/30 group-hover:w-full transition-all duration-700"></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hours" class="py-24 bg-black border-t border-white/5">
+        <div class="max-w-5xl mx-auto px-6" data-aos="fade-up">
+            <div class="text-center">
+                <span class="text-nava-rose font-sans font-bold tracking-[0.5em] uppercase text-[10px] mb-6 block">Availability</span>
+                <h2 class="font-serif text-4xl md:text-6xl text-white mb-16 italic">Opening Hours</h2>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-12">
+                    <div class="space-y-4">
+                        <p class="text-white/40 font-sans uppercase tracking-[0.3em] text-[9px]">Saturday to Thursday</p>
+                        <div class="flex items-center gap-6 justify-center">
+                            <span class="font-serif text-3xl text-white">10:00 AM</span>
+                            <span class="w-8 h-[1px] bg-nava-rose"></span>
+                            <span class="font-serif text-3xl text-white">10:00 PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="location" class="py-32 bg-nava-dark px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div class="text-left space-y-10" data-aos="fade-right">
+                <div class="space-y-2">
+                    <span class="text-nava-rose text-[10px] uppercase tracking-[0.5em] font-bold">The Destination</span>
+                    <h2 class="font-serif text-5xl text-white italic">Visit <span class="not-italic text-nava-rose">Nava</span></h2>
+                </div>
+                <div class="space-y-6 border-l border-white/10 pl-8">
+                    <p class="text-gray-400 font-sans tracking-[0.3em] text-[10px] uppercase">The Heart of Jeddah</p>
+                    <p class="text-white font-serif text-2xl italic leading-relaxed">Trio Boulevard, King Abdulaziz Road, Jeddah</p>
+                </div>
+                <div class="pt-4">
+                    <a href="https://maps.google.com" target="_blank" class="nava-link inline-flex items-center group">
+                        <span class="text-label text-nava-rose">Get Directions</span>
+                        <span class="expanding-line"></span>
+                        <span class="arrow-tip"><i class="fas fa-arrow-right"></i></span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="relative group" data-aos="fade-left">
+                <div class="absolute -inset-4 border border-nava-rose/20 scale-95 group-hover:scale-100 transition-transform duration-1000"></div>
+                <div class="relative aspect-square overflow-hidden bg-white/5 backdrop-blur-sm shadow-2xl">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3709.7242884128545!2d39.121098499999995!3d21.5966827!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x15c3cf51d7a77bcd%3A0x7aac13d7729d3135!2z2LnZitin2K_Yp9iqINmG2KfZgdinIHwgTmF2YSBDbGluaWNz!5e0!3m2!1sen!2ssa!4v1770826820410!5m2!1sen!2ssa" class="w-full h-full grayscale invert opacity-80 contrast-125 hover:grayscale-0 hover:invert-0 hover:opacity-100 transition-all duration-[1.5s]" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<footer class="relative bg-[#0A0A0A] border-t border-white/5 pt-20 pb-12 overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-nava-rose via-transparent to-transparent"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
+            
+            <div class="md:col-span-4 space-y-8 text-center md:text-left">
+                <img src="https://www.navaclinics.com/front/assets/images/logo-cta.svg" class="h-6 brightness-0 invert opacity-80 mx-auto md:mx-0" alt="Nava">
+                <p class="text-white/40 text-[11px] leading-relaxed tracking-widest uppercase max-w-xs mx-auto md:mx-0">
+                    The Essence of Beauty
+                </p>
+                <div class="flex justify-center md:justify-start items-center gap-6">
+                    <a href="https://www.instagram.com/navaclinics?igsh=MXRmdWJ4MDN6dmM3eA%3D%3D" class="nava-footer-icon group"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@navaclinics" class="nava-footer-icon group"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://www.snapchat.com/@navaclinics" class="nava-footer-icon group"><i class="fab fa-snapchat-ghost"></i></a>
+                    <a href="https://wa.me/966920006226" class="nava-footer-icon group"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <div class="md:col-span-3 text-center md:text-left">
+                <h4 class="text-nava-rose text-[10px] uppercase tracking-[0.4em] font-bold mb-8">Contact</h4>
+                <div class="space-y-4">
+                    <a href="tel:920006226" class="block font-serif text-2xl text-white hover:italic transition-all italic">92000 6226</a>
+                    <p class="text-[10px] text-white/40 leading-loose tracking-widest uppercase">
+                        Trio Boulevard<br>
+                        King Abdulaziz Road<br>
+                        Jeddah, Saudi Arabia
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-10 border-t border-white/[0.05] flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-10">
+                <p class="text-white/20 text-[8px] tracking-[0.4em] uppercase">© 2026 NAVA CLINICS</p>
+            </div>
+            <div class="flex gap-8 text-[8px] text-white/20 tracking-[0.4em] uppercase font-sans">
+                <a href="#" class="hover:text-nava-rose transition-colors">Privacy</a>
+                <a href="#" class="hover:text-nava-rose transition-colors">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 1000, once: true, disable: 'mobile' });
+
+        // Spotlight & Intersection Observer
+        const scrollContainer = document.getElementById('doctor-scroll');
+        const doctorCards = document.querySelectorAll('.doctor-card');
+        const docProgress = document.getElementById('doctor-progress');
+
+        const observerOptions = {
+            root: scrollContainer,
+            threshold: 0.6
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('is-active');
+                else entry.target.classList.remove('is-active');
+            });
+        }, observerOptions);
+
+        doctorCards.forEach(card => observer.observe(card));
+
+        // Scroll Progress & Navbar
+        window.onscroll = () => {
+            const nav = document.getElementById('navbar');
+            const scrolled = window.pageYOffset;
+            
+            nav.classList.toggle('bg-nava-dark/90', scrolled > 50);
+            nav.classList.toggle('backdrop-blur-md', scrolled > 50);
+            nav.classList.toggle('py-4', scrolled > 50);
+
+            const videoContainer = document.getElementById('hero-video-container');
+            if(videoContainer) videoContainer.style.transform = `translateY(${scrolled * 0.4}px) scale(1.1)`;
+
+            document.querySelectorAll('.reveal-text').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add('active');
+            });
+
+            // Booking Background Zoom Out
+            const bookingSection = document.getElementById('booking');
+            const bgImg = document.getElementById('booking-bg-img');
+            if (bookingSection && bgImg) {
+                const sectionTop = bookingSection.getBoundingClientRect().top;
+                if (sectionTop < window.innerHeight) bgImg.classList.add('zoom-out-effect');
+                else bgImg.classList.remove('zoom-out-effect');
+            }
+        };
+
+        // Doctor Scroll Progress
+        scrollContainer.addEventListener('scroll', () => {
+            const scrollWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+            const scrollPercent = (scrollContainer.scrollLeft / scrollWidth) * 100;
+            docProgress.style.width = `calc(25% + ${scrollPercent * 0.75}%)`;
+        });
+
+        // Menu Toggle
+        const menu = document.getElementById('mobile-menu');
+        document.getElementById('menu-toggle').onclick = () => menu.classList.remove('translate-y-full');
+        document.getElementById('close-menu').onclick = () => menu.classList.add('translate-y-full');
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.onclick = () => menu.classList.add('translate-y-full');
+        });
+
+        // Magnetic Button
+        const btn = document.getElementById('magnetic-btn');
+        if (window.innerWidth > 768) {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                btn.style.transform = `translate(${(e.clientX - rect.left - rect.width/2) * 0.3}px, ${(e.clientY - rect.top - rect.height/2) * 0.3}px) scale(1.05)`;
+            });
+            btn.addEventListener('mouseleave', () => btn.style.transform = 'translate(0,0) scale(1)');
+        }
+
+        // About Section Auto-Reveal Logic
+        const aboutTrigger = document.getElementById('about-trigger');
+
+        const aboutObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // This triggers the image color and the badge popup
+                    entry.target.classList.add('is-revealed');
+                    // We unobserve if we want the effect to stay forever once triggered
+                    aboutObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 }); // Triggers when 50% of the photo is visible
+
+        if(aboutTrigger) aboutObserver.observe(aboutTrigger);
+    </script>
+</body>
+</html>
