@@ -525,8 +525,8 @@
                 <h2 data-key="doctors" class="font-serif text-5xl md:text-7xl text-white italic">The <span class="not-italic text-nava-rose">Experts</span></h2>
             </div>
 
-            <div id="doctor-scroll" class="flex overflow-x-auto pb-12 gap-6 snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:overflow-visible md:gap-y-20">
-                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+            <div id="doctor-scroll" class="flex overflow-x-auto pb-12 gap-6 snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 md:overflow-visible md:gap-y-20" style="direction:ltr">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card" style="direction:inherit">
                     <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
                         <img src="assets/hatem.jpeg" class="doctor-img" alt="Hatem Al Noman">
                     </div>
@@ -536,7 +536,7 @@
                     </div>
                 </div>
 
-                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card" style="direction:inherit">
                     <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
                         <img src="assets/mawaddah.jpeg" class="doctor-img" alt="Mawaddah Tallab">
                     </div>
@@ -546,7 +546,7 @@
                     </div>
                 </div>
 
-                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card" style="direction:inherit">
                     <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
                         <img src="assets/ali.jpeg" class="doctor-img" alt="Ali Aldelgawi">
                     </div>
@@ -556,7 +556,7 @@
                     </div>
                 </div>
 
-                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card" style="direction:inherit">
                     <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
                         <img src="assets/Rasaa.jpeg" class="doctor-img" alt="Rasha Baaqeel">
                     </div>
@@ -566,7 +566,7 @@
                     </div>
                 </div>
 
-                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card" style="direction:inherit">
                     <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
                         <img src="assets/haddel.jpeg" class="doctor-img" alt="Hadeel Alkhatabi">
                     </div>
@@ -576,7 +576,7 @@
                     </div>
                 </div>
 
-                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card">
+                <div class="min-w-[80vw] md:min-w-0 snap-center doctor-card" style="direction:inherit">
                     <div class="relative aspect-[3/4] overflow-hidden bg-nava-dark mb-6">
                         <img src="assets/yas.jpeg" class="doctor-img" alt="Yasmin Alfayez">
                         </div>
@@ -815,21 +815,11 @@
     // 5. Doctor Horizontal Scroll Progress
     if (scrollContainer) {
         scrollContainer.addEventListener('scroll', () => {
-            const isRtl = document.documentElement.dir === 'rtl';
             const scrollWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-            // In RTL, scrollLeft is negative in most browsers
-            const rawScroll = isRtl ? -scrollContainer.scrollLeft : scrollContainer.scrollLeft;
-            const scrollPercent = (rawScroll / scrollWidth) * 100;
-            const barWidth = `calc(25% + ${scrollPercent * 0.75}%)`;
-            docProgress.style.width = barWidth;
-            // In RTL the bar grows from the right side
-            if (isRtl) {
-                docProgress.style.left = 'auto';
-                docProgress.style.right = '0';
-            } else {
-                docProgress.style.right = 'auto';
-                docProgress.style.left = '0';
-            }
+            const scrollPercent = (scrollContainer.scrollLeft / scrollWidth) * 100;
+            docProgress.style.width = `calc(25% + ${scrollPercent * 0.75}%)`;
+            docProgress.style.right = 'auto';
+            docProgress.style.left = '0';
         });
     }
 
@@ -928,19 +918,13 @@
         arBtn.classList.toggle('text-nava-rose', isAr);
         arBtn.classList.toggle('text-white/40', !isAr);
 
-        // Reset doctor progress bar position for the new direction
+        // Reset doctor scroll and progress bar
+        if (scrollContainer) scrollContainer.scrollLeft = 0;
         if (docProgress) {
             docProgress.style.width = '25%';
-            if (isAr) {
-                docProgress.style.left = 'auto';
-                docProgress.style.right = '0';
-            } else {
-                docProgress.style.right = 'auto';
-                docProgress.style.left = '0';
-            }
+            docProgress.style.right = 'auto';
+            docProgress.style.left = '0';
         }
-        // Reset scroll container to start
-        if (scrollContainer) scrollContainer.scrollLeft = 0;
 
         AOS.refresh();
     }
