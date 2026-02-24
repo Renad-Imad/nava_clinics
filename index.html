@@ -588,7 +588,7 @@
             </div>
 
             <div class="w-full h-[1px] bg-white/10 mt-8 md:hidden relative">
-                <div id="doctor-progress" class="absolute top-0 left-0 h-full bg-nava-rose w-1/4 transition-all duration-300"></div>
+                <div id="doctor-progress" class="absolute top-0 h-full bg-nava-rose w-1/4 transition-all duration-300" style="left:0"></div>
             </div>
         </div>
     </section>
@@ -815,9 +815,21 @@
     // 5. Doctor Horizontal Scroll Progress
     if (scrollContainer) {
         scrollContainer.addEventListener('scroll', () => {
+            const isRtl = document.documentElement.dir === 'rtl';
             const scrollWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-            const scrollPercent = (scrollContainer.scrollLeft / scrollWidth) * 100;
-            docProgress.style.width = `calc(25% + ${scrollPercent * 0.75}%)`;
+            // In RTL, scrollLeft is negative in most browsers
+            const rawScroll = isRtl ? -scrollContainer.scrollLeft : scrollContainer.scrollLeft;
+            const scrollPercent = (rawScroll / scrollWidth) * 100;
+            const barWidth = `calc(25% + ${scrollPercent * 0.75}%)`;
+            docProgress.style.width = barWidth;
+            // In RTL the bar grows from the right side
+            if (isRtl) {
+                docProgress.style.left = 'auto';
+                docProgress.style.right = '0';
+            } else {
+                docProgress.style.right = 'auto';
+                docProgress.style.left = '0';
+            }
         });
     }
 
@@ -915,6 +927,20 @@
         arBtn.classList.toggle('font-bold', isAr);
         arBtn.classList.toggle('text-nava-rose', isAr);
         arBtn.classList.toggle('text-white/40', !isAr);
+
+        // Reset doctor progress bar position for the new direction
+        if (docProgress) {
+            docProgress.style.width = '25%';
+            if (isAr) {
+                docProgress.style.left = 'auto';
+                docProgress.style.right = '0';
+            } else {
+                docProgress.style.right = 'auto';
+                docProgress.style.left = '0';
+            }
+        }
+        // Reset scroll container to start
+        if (scrollContainer) scrollContainer.scrollLeft = 0;
 
         AOS.refresh();
     }
